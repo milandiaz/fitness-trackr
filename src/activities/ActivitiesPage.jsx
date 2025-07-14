@@ -18,26 +18,51 @@ export default function ActivitiesPage() {
     loading: adding,
     error: addError,
   } = useMutation("POST", "/activities", ["activities"]);
-  // /** Calls the mutate function with data from the form */
+
+  /** Calls the mutate function with data from the form */
   const addActivity = (formData) => {
     const name = formData.get("name");
+    const description = formData.get("description");
     // breed is required to add a puppy
-    mutate({ name });
+    console.log("Submitting:", { name, description });
+    mutate({ name, description });
+  };
+
+  const {
+    mutate: deleteMutate,
+    loading: deleting,
+    error: deleteError,
+  } = useMutation("DELETE", "/activities", ["activities"]);
+
+  const handleDelete = (id) => {
+    deleteMutate(null, `/activities/${id}`);
   };
 
   return (
     <>
       <h1>Activities</h1>
-      {loading && <p>Loading...</p>}
-      {error && <p>Error: {error}</p>}
+
       {Array.isArray(activities) &&
-        activities.map((activity) => <p key={activity.id}>{activity.name}</p>)}
-      <form action={addActivity}>
+        activities.map((activity) => (
+          <div key={activity.id}>
+            <p>{activity.name}</p>
+            <button onClick={() => handleDelete(activity.id)}>Delete</button>
+          </div>
+        ))}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          addActivity(new FormData(e.target));
+        }}
+      >
         <label>
-          Name: <input name="name" />
+          Name: <input name="name" required />
+        </label>
+        <label>
+          Description: <input name="description" required />
         </label>
         <br />
-        <button>Submit</button>
+        <button type="submit">Submit</button>
       </form>
     </>
   );
